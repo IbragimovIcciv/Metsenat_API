@@ -16,9 +16,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     role = models.CharField(max_length=30, choices=ROLE_CHOICES, null=True, blank=True)
-    avatar = models.ImageField(upload_to="avatar/student", default="../media/avatar/student/default-student.webp")
-    is_staff = models.BooleanField(default=False)  # REQUIRED for admin access
-    is_superuser = models.BooleanField(default=False)  # REQUIRED for superusers
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -46,9 +45,10 @@ class Student(models.Model):
         MASTER = "master"
 
     full_name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=30, unique=True)
     degree = models.CharField(max_length=50, choices=StudentTypes.choices)
     contract_price = models.PositiveBigIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
     university = models.ForeignKey("api.University", on_delete=models.CASCADE, related_name="students")
 
     def __str__(self):
@@ -76,7 +76,7 @@ class Sponsor(models.Model):
     is_organization = models.BooleanField()
     progress = models.CharField(max_length=30, choices=StatusChoices.choices)
     sponsor_status = models.CharField(max_length=50, choices=SponsorStatus.choices, editable=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
     organization_name = models.CharField(max_length=250, blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -104,14 +104,18 @@ class Sponsor(models.Model):
 class StudentSponsor(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     sponsor = models.ForeignKey(Sponsor, on_delete=models.CASCADE)
-    amount = models.PositiveBigIntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.student, self.sponsor, self.amount, self.created_at
+        return str(self.student)
 
     class Meta:
         verbose_name = 'student sponsor'
         verbose_name_plural = 'student sponsors'
 
-# Login Register
+
+class PaymentSummary(models.Model):
+    created_at = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return "Payment Summary"
